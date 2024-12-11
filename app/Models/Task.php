@@ -11,7 +11,6 @@ class Task extends Model
 
     protected $fillable = [
         'incident_id',
-        'employee_id',
         'status_id',
         'responsible_cost_id',
         'description',
@@ -23,11 +22,6 @@ class Task extends Model
     public function incident()
     {
         return $this->belongsTo(Incident::class, 'incident_id');
-    }
-
-    public function employee()
-    {
-        return $this->belongsTo(MaintenanceEmployee::class, 'employee_id');
     }
 
     public function status()

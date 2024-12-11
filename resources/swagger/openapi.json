@@ -14,11 +14,11 @@
     "paths": {
       "/incidents": {
         "get": {
-          "summary": "Obtener todos los incidentes",
-          "description": "Devuelve una lista de todos los usuarios.",
+          "summary": "Get all the incidents by aparments",
+          "description": "Returns a list of all incidents grouped by apartment with its tasks",
           "responses": {
             "200": {
-              "description": "Lista de usuarios obtenida con éxito",
+              "description": "List of incidents grouped by apartment, with associated tasks",
               "content": {
                 "application/json": {
                   "schema": {
@@ -27,76 +27,16 @@
                       "type": "object",
                       "properties": {
                         "id": { "type": "integer" },
+                        "owner": { "type": "string" },
+                        "address": { "type": "string" },
                         "name": { "type": "string" },
-                        "email": { "type": "string" }
+                        "created_at": { "type": "string", "format": "date_time" },
+                        "updated_at": { "type": "string", "format": "date_time" }
                       }
                     }
                   }
                 }
               }
-            }
-          }
-        },
-        "post": {
-          "summary": "Crear un usuario",
-          "description": "Crea un nuevo usuario en el sistema.",
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "email": { "type": "string" },
-                    "password": { "type": "string" }
-                  },
-                  "required": ["name", "email", "password"]
-                }
-              }
-            }
-          },
-          "responses": {
-            "201": {
-              "description": "Usuario creado con éxito"
-            },
-            "400": {
-              "description": "Error de validación"
-            }
-          }
-        }
-      },
-      "/users/{id}": {
-        "get": {
-          "summary": "Obtener un usuario por ID",
-          "description": "Devuelve un usuario específico basado en su ID.",
-          "parameters": [
-            {
-              "name": "id",
-              "in": "path",
-              "required": true,
-              "schema": { "type": "integer" },
-              "description": "ID del usuario"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Usuario obtenido con éxito",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "id": { "type": "integer" },
-                      "name": { "type": "string" },
-                      "email": { "type": "string" }
-                    }
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Usuario no encontrado"
             }
           }
         }

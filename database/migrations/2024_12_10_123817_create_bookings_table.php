@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('customer_id');
             $table->unsignedBigInteger('apartment_id');
+            $table->string('customer');
             $table->datetime('start_date');
             $table->datetime('end_date');
             $table->timestamps();
 
-            $table->foreign('customer_id')->references('id')->on('customers');
             $table->foreign('apartment_id')->references('id')->on('apartments')->onDelete('cascade');
         });
     }
@@ -30,7 +29,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->dropForeign(['customer_id']);
             $table->dropForeign(['apartment_id']);
         });
         Schema::dropIfExists('bookings');
