@@ -15,6 +15,7 @@ class Task extends Model
         'status_id',
         'responsible_cost_id',
         'description',
+        'additional_information',
         'cost',
     ];
 

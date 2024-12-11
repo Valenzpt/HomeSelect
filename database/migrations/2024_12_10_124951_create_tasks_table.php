@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('status_id'); 
             $table->unsignedBigInteger('responsible_cost_id'); 
             $table->text('description'); 
+            $table->text('additional_information')->nullable();
             $table->decimal('cost', 10, 2); 
             $table->timestamps();
             

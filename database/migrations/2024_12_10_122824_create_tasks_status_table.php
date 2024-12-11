@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('tasks_status', function (Blueprint $table) {
             $table->id();
             $table->enum('description', ['Pendiente', 'Asignada', 'Solucionada', 'No solucionada'])->default('Pendiente');
-            $table->text('additional_information')->nullable();
             $table->timestamps();
         });
     }
