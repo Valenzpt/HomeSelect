@@ -16,6 +16,11 @@ return new class extends Migration
             $table->enum('type', ['Cliente', 'Propietario', 'HomeSelect']);
             $table->timestamps();
         });
+        DB::table('costs_responsibles')->insert([
+            ['type'=>'Cliente'],
+            ['type'=>'Propietario'],
+            ['type'=>'HomeSelect'],
+        ]);
     }
 
     /**
