@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('incident_id');
-            $table->unsignedBigInteger('employee_id'); 
             $table->unsignedBigInteger('status_id'); 
             $table->unsignedBigInteger('responsible_cost_id'); 
             $table->text('description'); 
@@ -23,7 +22,6 @@ return new class extends Migration
             $table->timestamps();
             
             $table->foreign('incident_id')->references('id')->on('incidents');
-            $table->foreign('employee_id')->references('id')->on('maintenance_employees');
             $table->foreign('status_id')->references('id')->on('tasks_status');
             $table->foreign('responsible_cost_id')->references('id')->on('costs_responsibles');
         });
@@ -36,7 +34,6 @@ return new class extends Migration
     {
         Schema::table('tasks', function (Blueprint $table) {
             $table->dropForeign(['incident_id']);
-            $table->dropForeign(['employee_id']);
             $table->dropForeign(['status_id']);
             $table->dropForeign(['responsible_cost_id']);
         });

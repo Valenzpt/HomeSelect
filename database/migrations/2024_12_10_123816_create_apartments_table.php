@@ -13,12 +13,10 @@ return new class extends Migration
     {
         Schema::create('apartments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('owner_id');
+            $table->string('owner');
             $table->string('address');
             $table->string('name');
             $table->timestamps();
-
-            $table->foreign('owner_id')->references('id')->on('owners')->onDelete('cascade');
         });
     }
 
@@ -27,9 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('apartments', function (Blueprint $table) {
-            $table->dropForeign(['owner_id']);
-        });
         Schema::dropIfExists('apartments');
     }
 };

@@ -13,15 +13,38 @@ class BookingController extends Controller
      */
     public function index()
     {
-        $bookings = Booking::with(['customer', 'apartment'])->get();
+        $bookings = Booking::with(['apartment'])->get();
         if($bookings->isEmpty()){
-            $data = [
-                'message' => 'No se encontraron reservas',
+            return response()->json( [
+                'message' => 'No booking found',
                 'status'=> 200
-            ];
-            return response()->json($data, 200);
+            ], 200);
         };
-        return response()->json($bookings, 200);
+
+        $groupedBookings = $bookings->groupBy(function ($booking) {
+            return $booking->apartment->id;
+        });
+
+        $result = $groupedBookings->map(function ($bookings, $apartmentId) {
+            $apartment = $bookings->first()->apartment;
+            return [
+                'apartment_name' => $apartment->name,
+                'apartment_address' => $apartment->address,
+                'apartment_owner' => $apartment->owner,
+                'bookings' => $bookings->map(function ($booking) {
+                    return [
+                        'booking_id' => $booking->id,
+                        'customer' => $booking->customer,
+                        'star_date' => $booking->start_date,
+                        'end_date' => $booking->end_date
+                    ];
+                }),
+            ];
+        })->values();
+        return response()->json([
+            'data' => $result,
+            'status' => 200
+        ], 200);
     }
 
     /**
@@ -29,70 +52,81 @@ class BookingController extends Controller
      */
     public function store(Request $request)
     {
+        //input validation
         $validator = Validator::make($request->all(), [
-            'customer_id' => 'required|exists:customers,id',
             'apartment_id' => 'required|exists:apartments,id',
+            'customer' => 'required|string',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after:start_date',
         ]);
         if($validator->fails()) {
-            $data = [
-                'message' => 'Error en la validacion de datos',
+            return response()->json([
+                'message' => 'Data validation errors',
                 'errors' => $validator->errors(),
                 'status' => 400
-            ];
-            return response()->json($data, 400);
+            ], 400);
         }
-       // return response()->json($validator, 200);
+        //Booking availability
         if(!Booking::isAvailable($request->apartment_id, $request->start_date, $request->end_date)){
             return response()->json([
-                'error' => 'El apartamento no esta disponible en las fechas seleccionadas',
-                'status' => 422
-            ]);
+                'error' => 'Apartment no available on selected dates',
+                'status' => 409
+            ], 409);
         }
-
+        //create booking
         $booking = Booking::create([
-            'customer_id' => $request->customer_id,
             'apartment_id' => $request->apartment_id,
+            'customer' => $request->customer,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
         ]);
         
         if(!$booking){
-            $data = [
-                'message' => 'Error al crear reserva',
+            return response()->json([
+                'message' => 'Error creating booking',
                 'status' => 500
-            ];
-            return response()->json($data, 500);
+            ], 500);
         }
 
-        $data = [
-            'booking' => $booking,
-            'status' => 200
-        ];
-
         return response()->json([
-            'message' => 'Reserva creada exitosamente',
-            'data' => $data
-        ], 200);
+            'message' => 'Booking created successfully',
+            'data' => $booking,
+            'status' => 201
+        ], 201);
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified booking.
      */
     public function show($id)
     {
-        $booking = Booking::with(['customer', 'apartment'])->find($id);
+        $booking = Booking::with(['apartment'])->find($id);
         if(!$booking){
-            return response()->json(['error' => 'Reserva no encontrada'], 404);
+            return response()->json([
+                'error' => 'No booking found',
+                'status' => 404
+            ], 404);
         }
+        $result = [
+            'customer' => $booking->customer,
+            'start_date' => $booking->start_date,
+            'end_date' => $booking->end_date,
+            'apartment' => [
+                'apartment_name' => $booking->apartment->name,
+                'apartment_address' => $booking->apartment->address,
+                'apartment_owner' => $booking->apartment->owner
+            ]
+        ];
         
-        return response()->json($booking, 200);
+        return response()->json([
+            'data' => $result,
+            'status' => 200
+        ], 200);
     }
 
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified booking in storage.
      */
     public function update(Request $request, $id)
     {
@@ -100,49 +134,48 @@ class BookingController extends Controller
 
         if(!$booking) {
             return response()->json([
-                'error' => 'Reserva no encontrada',
+                'message' => 'No booking found',
                 'status' => 404
-            ]);
+            ], 404);
         }
         
         $validator = Validator::make($request->all(), [
-            'customer_id' => 'required|exists:customers,id',
             'apartment_id' => 'required|exists:apartments,id',
+            'customer' => 'required|string',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after:start_date',
         ]);
 
         if($validator->fails()) {
-            $data = [
-                'message' => 'Error en la validacion de datos',
+            return response()->json([
+                'message' => 'Data validation errors',
                 'errors' => $validator->errors(),
                 'status' => 400
-            ];
-            return response()->json($data, 400);
+            ], 400);
         }
-        
+        //Booking availability
         if(!Booking::isAvailable($request->apartment_id, $request->start_date, $request->end_date, $booking->id)){
             return response()->json([
-                'error' => 'El apartamento no esta disponible en las fechas seleccionadas',
-                'status' => 422
-            ]);
+                'error' => 'Apartment no available on selected dates',
+                'status' => 409
+            ], 409);
         }
 
         $booking->update([
-            'customer_id' => $request->customer_id,
             'apartment_id' => $request->apartment_id,
+            'customer' => $request->customer,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
         ]);
 
         return response()->json([
-            'message' => 'Reserva actualizada exitosamente',
+            'message' => 'Booking updated successfully',
             'data' => $booking
         ], 200);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified booking from storage.
      */
     public function destroy($id)
     {
@@ -150,14 +183,15 @@ class BookingController extends Controller
 
         if(!$booking) {
             return response()->json([
-                'error' => 'Reserva no encontrada',
+                'error' => 'Booking not found',
                 'status' => 404
             ]);
         }
 
         $booking->delete();
         return response()->json([
-            'message' => 'Reserva eliminada exitosamente'
+            'message' => 'Booking removed successfully',
+            'status' => 200
         ], 200);
     }
 }

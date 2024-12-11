@@ -9,15 +9,10 @@ class Apartment extends Model
     protected $table = 'apartments';
 
     protected $fillable = [
-        'owner_id',
+        'owner',
         'address',
         'name',
     ];
-
-    public function owner()
-    {
-        return $this->belongsTo(Owner::class, 'owner_id');
-    }
 
     public function bookings()
     {
