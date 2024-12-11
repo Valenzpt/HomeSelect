@@ -16,6 +16,13 @@ return new class extends Migration
             $table->enum('description', ['Pendiente', 'Asignada', 'Solucionada', 'No solucionada'])->default('Pendiente');
             $table->timestamps();
         });
+
+        DB::table('tasks_status')->insert([
+            ['description'=>'Pendiente'],
+            ['description'=>'Asignada'],
+            ['description'=>'Solucionada'],
+            ['description'=>'No solucionada'],
+        ]);
     }
 
     /**
