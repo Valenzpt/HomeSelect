@@ -10,8 +10,7 @@ class TaskStatus extends Model
     protected $table = 'tasks_status';
 
     protected $fillable = [
-        'description',
-        'additional_information',
+        'description'
     ];
 
     public function tasks()
